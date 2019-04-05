@@ -3,6 +3,7 @@ package com.example.jsonparsing;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.util.Log;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -12,6 +13,14 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -40,6 +49,7 @@ public class MainActivity extends AppCompatActivity
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+        processJSON();
     }
 
     @Override
@@ -98,4 +108,50 @@ public class MainActivity extends AppCompatActivity
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
+    private void processJSON(){
+        String jsonString = loadJSONFromAsset();
+        if(jsonString!=null){
+            try {
+                JSONArray mJSONArray = new JSONArray(jsonString);
+                for (int i=0; i<mJSONArray.length();i++){
+                    JSONObject mJSONObject = mJSONArray.getJSONObject(i);
+                    if(mJSONObject.has("id")) {
+                        int id = mJSONObject.getInt("id");
+                    }
+                    String name = mJSONObject.getString("name");
+
+                    Log.d("----JSON----",name);
+                    //read address json Object
+                    JSONObject mAddress = mJSONObject.getJSONObject("address");
+                    String city = mAddress.getString("city");
+                    Log.d("----JSON----",city);
+
+
+                }
+
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+
+        }
+    }
+
+
+    private String loadJSONFromAsset() {
+        String json;
+        try {
+            InputStream is = getAssets().open("UserList.json");
+            int size = is.available();
+            byte[] buffer = new byte[size];
+            is.read(buffer);
+            is.close();
+            json = new String(buffer, StandardCharsets.UTF_8);
+        } catch (IOException ex) {
+            ex.printStackTrace();
+            return null;
+        }
+        return json;
+    }
+
 }
